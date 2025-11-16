@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapIndia Pro - Advanced Navigation &amp; Maps</title>
+    <meta name="description" content="Advanced mapping and navigation platform for India and worldwide users with real-time traffic, POI search, and multi-modal routing.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet Marker Cluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <!-- Material Design Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <h2>MapIndia Pro</h2>
+        <p>Loading advanced mapping features...</p>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="app-container" style="display: none;">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1>🗺️ MapIndia Pro</h1>
+                    <span class="version-badge">v2.0</span>
+                </div>
+                <div class="header-controls">
+                    <select id="language-selector" class="form-control language-selector">
+                        <option value="en">🇬🇧 English</option>
+                        <option value="hi">🇮🇳 हिन्दी</option>
+                        <option value="ta">🇮🇳 தமிழ்</option>
+                        <option value="te">🇮🇳 తెలుగు</option>
+                    </select>
+                    <button id="theme-toggle" class="btn btn--outline" title="Toggle Dark Mode">
+                        <i class="material-icons">dark_mode</i>
+                    </button>
+                    <button id="menu-toggle" class="btn btn--primary mobile-only" title="Toggle Menu">
+                        <i class="material-icons">menu</i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <!-- Search Panel -->
+            <div class="panel search-panel active">
+                <div class="panel-header">
+                    <h3><i class="material-icons">search</i> Search &amp; Explore</h3>
+                </div>
+                <div class="panel-content">
+                    <div class="search-container">
+                        <div class="search-input-wrapper">
+                            <i class="material-icons search-icon">search</i>
+                            <input type="text" id="search-input" class="form-control search-input" placeholder="Search places, cities, landmarks..." autocomplete="off">
+                            <button id="clear-search" class="clear-search-btn" style="display: none;">
+                                <i class="material-icons">clear</i>
+                            </button>
+                        </div>
+                        <div id="search-suggestions" class="search-suggestions"></div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <button id="locate-me" class="btn btn--secondary btn--sm">
+                            <i class="material-icons">my_location</i> Locate Me
+                        </button>
+                        <button id="fullscreen" class="btn btn--outline btn--sm">
+                            <i class="material-icons">fullscreen</i> Fullscreen
+                        </button>
+                    </div>
+                    
+                    <!-- POI Categories -->
+                    <div class="poi-categories">
+                        <h4>Points of Interest</h4>
+                        <div class="poi-buttons" id="poi-buttons"></div>
+                    </div>
+                    
+                    <!-- Map Overlays -->
+                    <div class="map-overlays">
+                        <h4>Map Overlays</h4>
+                        <div class="overlay-controls">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="traffic-toggle">
+                                <span class="slider">Traffic</span>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="weather-toggle">
+                                <span class="slider">Weather</span>
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="aqi-toggle">
+                                <span class="slider">Air Quality</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Route Planning Panel -->
+            <div class="panel route-panel">
+                <div class="panel-header">
+                    <h3><i class="material-icons">directions</i> Route Planning</h3>
+                </div>
+                <div class="panel-content">
+                    <div class="route-inputs">
+                        <div class="input-group">
+                            <i class="material-icons input-icon">radio_button_checked</i>
+                            <input type="text" id="route-from" class="form-control" placeholder="Starting point...">
+                        </div>
+                        <div class="input-group">
+                            <i class="material-icons input-icon">location_on</i>
+                            <input type="text" id="route-to" class="form-control" placeholder="Destination...">
+                        </div>
+                        <button id="swap-locations" class="btn btn--outline btn--sm swap-btn">
+                            <i class="material-icons">swap_vert</i>
+                        </button>
+                    </div>
+                    
+                    <!-- Travel Modes -->
+                    <div class="travel-modes" id="travel-modes"></div>
+                    
+                    <!-- Route Options -->
+                    <div class="route-options">
+                        <h4>Route Preferences</h4>
+                        <select id="route-preference" class="form-control">
+                            <option value="fastest">Fastest Route</option>
+                            <option value="shortest">Shortest Distance</option>
+                            <option value="scenic">Scenic Route</option>
+                            <option value="avoid-tolls">Avoid Tolls</option>
+                        </select>
+                    </div>
+                    
+                    <button id="get-directions" class="btn btn--primary btn--full-width">
+                        <i class="material-icons">navigation</i> Get Directions
+                    </button>
+                    
+                    <!-- Directions List -->
+                    <div id="directions-list" class="directions-list"></div>
+                </div>
+            </div>
+
+            <!-- Favorites Panel -->
+            <div class="panel favorites-panel">
+                <div class="panel-header">
+                    <h3><i class="material-icons">favorite</i> Favorites &amp; Saved</h3>
+                </div>
+                <div class="panel-content">
+                    <div id="favorites-list" class="favorites-list">
+                        <p class="no-favorites">No saved locations yet. Search for a place and click the star to save it!</p>
+                    </div>
+                    
+                    <div class="offline-mode">
+                        <div class="status-indicator offline">
+                            <i class="material-icons">cloud_off</i>
+                            <span>Offline Mode Available</span>
+                        </div>
+                        <button class="btn btn--outline btn--sm">
+                            <i class="material-icons">download</i> Download Maps
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-navigation">
+            <button class="tab-btn active" data-panel="search">
+                <i class="material-icons">search</i>
+                <span>Search</span>
+            </button>
+            <button class="tab-btn" data-panel="route">
+                <i class="material-icons">directions</i>
+                <span>Route</span>
+            </button>
+            <button class="tab-btn" data-panel="favorites">
+                <i class="material-icons">favorite</i>
+                <span>Saved</span>
+            </button>
+        </nav>
+
+        <!-- Main Map Container -->
+        <main class="main-content">
+            <div id="map" class="map-container"></div>
+            
+            <!-- Map Controls -->
+            <div class="map-controls">
+                <div class="control-group zoom-controls">
+                    <button id="zoom-in" class="control-btn" title="Zoom In">
+                        <i class="material-icons">add</i>
+                    </button>
+                    <button id="zoom-out" class="control-btn" title="Zoom Out">
+                        <i class="material-icons">remove</i>
+                    </button>
+                </div>
+                
+                <div class="control-group location-controls">
+                    <button id="current-location" class="control-btn" title="Current Location">
+                        <i class="material-icons">gps_fixed</i>
+                    </button>
+                </div>
+                
+                <div class="control-group layer-controls">
+                    <button id="satellite-view" class="control-btn" title="Satellite View">
+                        <i class="material-icons">satellite</i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Weather Widget -->
+            <div id="weather-widget" class="weather-widget" style="display: none;">
+                <div class="weather-content">
+                    <div class="weather-icon">☀️</div>
+                    <div class="weather-info">
+                        <div class="temperature">28°C</div>
+                        <div class="condition">Sunny</div>
+                        <div class="location">Mumbai, India</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AQI Widget -->
+            <div id="aqi-widget" class="aqi-widget" style="display: none;">
+                <div class="aqi-content">
+                    <div class="aqi-value">65</div>
+                    <div class="aqi-label">AQI</div>
+                    <div class="aqi-status moderate">Moderate</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Location Details Modal -->
+        <div id="location-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Location Details</h3>
+                    <button id="close-modal" class="close-btn">
+                        <i class="material-icons">close</i>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Dynamic content -->
+                </div>
+                <div class="modal-footer">
+                    <button id="save-location" class="btn btn--primary">
+                        <i class="material-icons">favorite_border</i> Save Location
+                    </button>
+                    <button id="share-location" class="btn btn--outline">
+                        <i class="material-icons">share</i> Share
+                    </button>
+                    <button id="get-directions-modal" class="btn btn--secondary">
+                        <i class="material-icons">directions</i> Directions
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Leaflet Marker Cluster JS -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <!-- Main Application -->
+    <script src="app.js"></script>
+</body>
+</html>
